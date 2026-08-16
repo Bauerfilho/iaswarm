@@ -118,6 +118,28 @@ run, a agy reportou 6 vezes e o Qwen 5. **Antes de concluir que um worker morreu
 contador de etapas. (Um heartbeat derivado do log é o próximo passo — fora desta versão
 porque ainda não foi testado, e aqui não se publica código não exercitado.)
 
+## ⚠️ Segurança — leia antes de usar
+
+**Os workers rodam com permissões amplas.** Os adaptadores auto-aprovam ferramentas:
+Qwen com `-y`, agy e grok com `--dangerously-skip-permissions`, Kimi com babá que responde
+"aprovar" aos prompts. Sem isso não existe despacho headless — um worker que para para pedir
+permissão a ninguém fica parado para sempre. É uma troca consciente, não um descuido.
+
+O que isso significa na prática, sem eufemismo:
+
+- **A fronteira de escrita é o CONTRATO, e contrato é texto.** Se o seu contrato diz
+  "somente leitura", você está confiando no worker obedecer. Não há sandbox aqui.
+- **Escreva contratos com fronteira explícita** — caminhos permitidos nomeados um a um — e
+  trate isso como a única trava que existe.
+- **Não despache contrato que você não leu** e não aponte workers para diretório que você não
+  pode perder. Rode em repositório versionado, ou com backup, ou em cópia.
+- **Se o seu ambiente exige isolamento real**, troque o adaptador por uma chamada em
+  container/sandbox antes de usar em produção. Cada `despacha_*` tem ~10 linhas; é o ponto
+  certo para plugar seu confinamento.
+
+A alternativa — pedir aprovação a cada tool — mata a premissa do enxame. Preferimos declarar
+o risco em voz alta a escondê-lo atrás de um default que parece seguro e não é.
+
 ## Estado (honesto)
 
 - Adaptadores incluídos são os da casa de origem (Qwen Code `-y` · Kimi via tmux com
