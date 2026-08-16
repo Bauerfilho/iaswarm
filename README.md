@@ -4,11 +4,16 @@
 grandes aos provedores que já paga — maximizando desempenho, espalhando o peso dos
 custos entre as assinaturas e chegando a resultados melhores, mais rápido.
 
-O agente principal (o caro) **não executa nada**: decompõe a missão em contratos com
-etapas verificáveis, despacha workers em CLIs de IA *diferentes* em paralelo,
-acompanha tudo num painel vivo de progresso, e fecha o ciclo com um **juiz de motor
-independente** que re-verifica por conta própria — heterogeneidade virando auditoria
-de graça.
+Orquestrar **não é repassar** — o trabalho se divide assim:
+
+| quem | executa o quê |
+|---|---|
+| **IA orquestradora** (a que ativa a skill) | grande parte do trabalho: decompõe a missão, **escreve os contratos** (etapas, fronteiras, critérios verificáveis), despacha e **pilota** os CLIs, vigia as transições, **destrava incidentes** (worker preso, cota, diálogo de aprovação), colhe os resultados, arma o juiz, **arbitra os vereditos** e assina a síntese final |
+| **Workers** (os outros provedores, em paralelo) | o **músculo das sub-tarefas**: pesquisa, geração, código — cada um numa frente independente e autocontida, reportando progresso etapa a etapa no painel |
+| **Juiz** (motor diferente de todos os autores) | **re-verifica amostras por conta própria** e dá veredito por worker — heterogeneidade virando auditoria de graça |
+
+A única coisa que a skill **proíbe** à orquestradora é executar o músculo ela mesma —
+é isso que espalha o custo e mantém quem julga separado de quem produz.
 
 > Inspirada na habilidade `/swarm` do Kimi Code e no modo ultracode do Claude Code —
 > e nascida do encontro dos dois: a dispersão de um, a exigência do outro.
