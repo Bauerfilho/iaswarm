@@ -76,11 +76,56 @@
 <div id="grid"></div>
 <footer>brilho = evidência em disco · falha é sempre coral · síntese e gates são da orquestradora</footer>
 <script>
+/* ---------- CORES POR BRAÇO ----------
+   1. marca conhecida → cor oficial dela
+   2. alias comum → normalizado para a marca (gpt→openai, claude→anthropic…)
+   3. desconhecido → matiz derivado do NOME (determinístico: mesmo braço, sempre a mesma cor)
+   Regra de leitura do painel: coral = falha · cinza = pulado. O fallback NUNCA usa essas
+   duas famílias, senão braço desconhecido parece apagado — que era o defeito da v0.1. */
 const CORES = {
+  // a casa de origem
   agy:"#4285F4", kimi:"#A78BFA", codex:"#10A37F", grok:"#EDEDED",
   qwen:"#7C3AED", ollama:"#F59E0B", deepseek:"#1E40AF", hermes:"#D4A017",
-  copilot:"#2188FF", dourada:"#FFD700"
+  copilot:"#2188FF", dourada:"#FFD700",
+  // provedores conhecidos do mercado (cor da marca)
+  openai:"#10A37F", anthropic:"#D97757", google:"#4285F4", gemini:"#4285F4",
+  mistral:"#FF7000", meta:"#0064E0", llama:"#0064E0", cohere:"#39594D",
+  perplexity:"#20808D", groq:"#F55036", together:"#0F6FFF", openrouter:"#6467F2",
+  xai:"#EDEDED", nvidia:"#76B900", nim:"#76B900", huggingface:"#FFD21E",
+  azure:"#0078D4", bedrock:"#FF9900", vertex:"#4285F4", moonshot:"#A78BFA",
+  alibaba:"#FF6A00", zhipu:"#3859FF", glm:"#3859FF", minimax:"#E8437E",
+  yi:"#00A6A6", stability:"#8B5CF6", replicate:"#EA4C89", fireworks:"#F0533B",
+  lmstudio:"#4F46E5", vllm:"#00B8D9", llamacpp:"#8FBF3F", cerebras:"#F05A28",
+  sambanova:"#EE3124", baseten:"#3B82F6", modal:"#7FEE64", fal:"#C026D3"
 };
+/* aliases → marca canônica */
+const ALIAS = {
+  gpt:"openai", "gpt-4":"openai", "gpt-5":"openai", o1:"openai", o3:"openai",
+  claude:"anthropic", opus:"anthropic", sonnet:"anthropic", haiku:"anthropic", fable:"anthropic",
+  k2:"kimi", k3:"kimi", "kimi-k2":"kimi", "kimi-k3":"kimi",
+  antigravity:"agy", "gemini-flash":"gemini", "gemini-pro":"gemini",
+  nemotron:"nvidia", hf:"huggingface", "gpt-oss":"openai",
+  qwen3:"qwen", qwq:"qwen", wan:"qwen", bailian:"alibaba", dashscope:"alibaba",
+  "deepseek-v4":"deepseek", r1:"deepseek", ds:"deepseek",
+  phi:"azure", mixtral:"mistral", codestral:"mistral", magistral:"mistral"
+};
+/* cor estável para braço desconhecido: matiz do hash do nome, fora das faixas
+   reservadas (coral ~5-25° = falha · cinza dessaturado = pulado) */
+function corDeFallback(nome){
+  let h = 0;
+  for (let i = 0; i < nome.length; i++) h = (h * 31 + nome.charCodeAt(i)) >>> 0;
+  const matiz = 40 + (h % 300);            // 40°..340° — pula a faixa do coral
+  return `hsl(${matiz} 68% 62%)`;          // saturado e claro: legível no fundo escuro
+}
+function corDoBraco(braco){
+  const b = String(braco || "").toLowerCase().split(":")[0].split("/")[0].trim();
+  if (CORES[b]) return CORES[b];
+  if (ALIAS[b] && CORES[ALIAS[b]]) return CORES[ALIAS[b]];
+  // prefixo: "openai-compatible-chat-abc" → openai · "qwen3-coder" → qwen
+  for (const chave of Object.keys(CORES))  if (b.startsWith(chave)) return CORES[chave];
+  for (const chave of Object.keys(ALIAS))  if (b.startsWith(chave)) return CORES[ALIAS[chave]];
+  return corDeFallback(b || "desconhecido");
+}
 const ROTULO_ESTADO = {fila:"na fila", despachado:"despachado", rodando:"trabalhando",
   entregue:"entregue ✓", falhou:"FALHOU", pulado:"pulado (cota)"};
 async function tick(){
@@ -93,7 +138,7 @@ async function tick(){
       `${done}/${(d.workers||[]).length} entregues · atualizado ${d.gerado}`;
     const g = document.getElementById("grid"); g.innerHTML = "";
     for(const w of (d.workers||[])){
-      const cor = CORES[w.braco] || "#8fb0ba";
+      const cor = corDoBraco(w.braco);
       const li = document.createElement("div");
       li.className = "linha " + w.estado;
       li.style.setProperty("--cor", cor);

@@ -87,14 +87,14 @@ despacha_ollama() { local w=$1 n=$2 c=$3 modelo=$4  # stdout puro: wrapper conve
 
 despacha_agy() { local w=$1 n=$2 c=$3   # BETA: validar a forma de chamada no 1º uso real
   marca "$w" 0 "$n" despachado "agy (beta)"
-  ( agy --print-timeout 20m -p "$(protocolo "$w" "$n" "$c")" < /dev/null > "logs/$w.log" 2>&1
+  ( agy --print-timeout 20m --dangerously-skip-permissions -p "$(protocolo "$w" "$n" "$c")" < /dev/null > "logs/$w.log" 2>&1
     if [ -s "resultados/$w.md" ]; then marca "$w" "$n" "$n" entregue ""; else marca "$w" -1 "$n" falhou "beta: conferir forma de chamada (logs/$w.log)"; fi ) &
   echo $! > "logs/$w.pid"
 }
 
 despacha_grok() { local w=$1 n=$2 c=$3   # BETA: validar a forma de chamada no 1º uso real
   marca "$w" 0 "$n" despachado "grok (beta)"
-  ( grok -p "$(protocolo "$w" "$n" "$c")" < /dev/null > "logs/$w.log" 2>&1
+  ( grok -p "$(protocolo "$w" "$n" "$c")" --dangerously-skip-permissions < /dev/null > "logs/$w.log" 2>&1
     if [ -s "resultados/$w.md" ]; then marca "$w" "$n" "$n" entregue ""; else marca "$w" -1 "$n" falhou "beta: conferir forma de chamada (logs/$w.log)"; fi ) &
   echo $! > "logs/$w.pid"
 }
@@ -105,6 +105,20 @@ echo "$PORT" > painel-porta.txt
 cp "$IAS/painel.html" index.html
 python3 "$IAS/state.py" "$RUN" > state.json || true
 ( python3 -m http.server "$PORT" --bind 127.0.0.1 >/dev/null 2>&1 & echo $! > http.pid )
+# atualizador do painel — independe do watch.sh: quem só roda o dispatch TAMBÉM vê o painel vivo.
+# (defeito corrigido 16/08: sem isto o painel congela no instante do disparo.)
+( while :; do
+    python3 "$IAS/state.py" "$RUN" > state.json.tmp 2>/dev/null && mv state.json.tmp state.json
+    vivo=$(python3 -c "
+import json
+try:
+    d=json.load(open('state.json'))
+    print(sum(1 for w in d.get('workers',[]) if w['estado'] not in ('entregue','falhou','pulado')))
+except Exception: print(1)" 2>/dev/null)
+    [ "${vivo:-1}" = "0" ] && break
+    sleep 2
+  done ) >/dev/null 2>&1 &
+echo $! > painel-refresh.pid
 open "http://127.0.0.1:$PORT/index.html" 2>/dev/null || true
 
 # ---------------- despacho ----------------

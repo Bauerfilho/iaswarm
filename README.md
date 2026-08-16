@@ -73,14 +73,61 @@ missão → contratos (etapas enumeradas) → dispatch paralelo nos CLIs
 5. **Falha nunca é silêncio**: worker que trava reporta `falhou` + motivo; o watch
    emite a transição; o painel pinta coral.
 
-## Estado (v0.1 — honesto)
+## v0.2 (2026-08-16) — o que a segunda execução real quebrou
+
+A v0.1 nasceu de um dia. A segunda missão real (5 workers, 5 braços simultâneos) achou três
+defeitos que a primeira não tinha exercitado. Dois estão corrigidos aqui; o terceiro está
+documentado porque é comportamento, não bug.
+
+**1. `agy` e `grok` travavam esperando aprovação — CORRIGIDO**
+Os dois adaptadores estavam marcados `# BETA: validar a forma de chamada no 1º uso real` e
+não passavam `--dangerously-skip-permissions`. Num despacho headless o worker fica parado
+pedindo uma aprovação que ninguém vai dar: sem erro, sem log, sem falha — só "despachado"
+para sempre. Foi exatamente o que o comentário previa que aconteceria, e aconteceu.
+
+**2. O painel nascia morto — CORRIGIDO**
+`dispatch.sh` gerava o `state.json` **uma vez** e subia o servidor HTTP. Quem regenerava era
+o `bin/watch.sh`, um passo separado que só quem leu a SKILL.md sabe que precisa armar.
+Resultado para quem clonava o repo: painel congelado em `0/N` no instante do disparo, com os
+workers trabalhando normalmente por baixo. **O pior tipo de defeito — parece quebrado estando
+inteiro.** Agora o `dispatch.sh` sobe seu próprio atualizador em background (2s), que morre
+sozinho quando todos os workers chegam a estado terminal. O `watch.sh` continua existindo
+para o que é dele: emitir TRANSIÇÕES para o Monitor da orquestradora. Duas responsabilidades,
+duas peças, nenhuma dependendo de alguém lembrar.
+
+**3. Braço de fora da casa nascia sem cor — CORRIGIDO**
+O painel só conhecia os 10 braços de origem; qualquer outro caía no fallback `#8fb0ba`,
+que é **a mesma cor do texto secundário** e quase idêntica ao cinza de "pulado". Quem
+clonasse e plugasse o próprio provedor via um adaptador seu via o worker nascer parecendo
+apagado. Agora são três camadas:
+- **marca conhecida** → cor oficial (openai, anthropic, google/gemini, mistral, meta/llama,
+  cohere, perplexity, groq, together, openrouter, xai, nvidia, huggingface, azure, bedrock,
+  vertex, zhipu/glm, minimax, cerebras, replicate, fireworks, modal, fal… além dos 10 da casa)
+- **alias e prefixo** → normalizados (`gpt-5`→openai · `claude`/`opus`/`sonnet`→anthropic ·
+  `k3`→kimi · `nemotron`→nvidia · `qwen3-coder`→qwen · `openai-compatible-chat-abc123`→openai)
+- **desconhecido** → matiz derivado do hash do NOME: determinístico (o mesmo braço tem sempre
+  a mesma cor), distinto entre si, e **fora das faixas reservadas** — coral é falha, cinza é
+  pulado, e um braço novo jamais deve se confundir com nenhum dos dois.
+
+**4. `0/N` parado não significa travado — COMPORTAMENTO, não bug**
+A granularidade do reporte é do worker, não da infra. Na missão de 16/08 o Codex ficou
+**20 minutos em `0/5`** enquanto varria dez diretórios — 166 KB de log, `find`/`stat`/`ls`
+rodando o tempo todo — porque só appenda a linha de progresso ao FECHAR a etapa. No mesmo
+run, a agy reportou 6 vezes e o Qwen 5. **Antes de concluir que um worker morreu, olhe
+`logs/<worker>.log`: crescendo = vivo.** O par que decide é *stderr + artefato*, nunca o
+contador de etapas. (Um heartbeat derivado do log é o próximo passo — fora desta versão
+porque ainda não foi testado, e aqui não se publica código não exercitado.)
+
+## Estado (honesto)
 
 - Adaptadores incluídos são os da casa de origem (Qwen Code `-y` · Kimi via tmux com
-  babá de aprovações · Codex `exec` · Ollama por marcador de stdout · agy/grok beta).
+  babá de aprovações · Codex `exec` · Ollama por marcador de stdout · agy/grok — agora
+  validados em uso real).
   **Generalização por arquivo de config é o TODO nº 1** — hoje você adapta editando
   `bin/dispatch.sh` (funções `despacha_*`, ~10 linhas cada).
 - Testado em macOS (zsh, tmux 3.7, python3). Painel: HTML puro + `python3 -m http.server`.
-- Nascido e provado em produção real em um único dia — maturidade é a de um dia bem vivido.
+- Duas missões reais em dois dias. Maturidade é a de dois dias bem vividos — e o segundo
+  serviu justamente para descobrir o que o primeiro não tinha tocado.
 
 ## Licença
 

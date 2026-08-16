@@ -55,7 +55,9 @@ NA CASA DELE. Brilho do painel = evidência em disco; barra não substitui gate.
 4. Colher `resultados/`, despachar juiz, sintetizar, cristalizar placar na memória.
 
 ## PAINEL (obrigatório por rodada)
-1 fileira por worker, bolinhas por etapa, **cor da IA** (agy azul-Google · kimi violeta ·
+1 fileira por worker, bolinhas por etapa, **cor da IA** — marca conhecida usa a cor
+oficial dela; braço de fora da casa recebe matiz derivado do hash do NOME (determinístico e
+fora das faixas reservadas: coral=falha, cinza=pulado). Nenhum braço nasce sem cor — (agy azul-Google · kimi violeta ·
 codex teal · grok branco-neon · qwen roxo · ollama âmbar · deepseek azul-profundo ·
 hermes dourado-nous · copilot cobalto · dourada dourado) — concluída acesa com glow,
 ativa pulsando, falha coral (universal), fila apagada, pulada cinza. Lindo com 1 ou 10.
