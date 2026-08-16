@@ -1,12 +1,17 @@
 # 🐝 iaswarm
 
-**Enxame de frota para orquestradores de IA** — decomponha uma missão, despache workers
-em CLIs de IA *diferentes* (cada um na sua assinatura), acompanhe o progresso num painel
-vivo de bolinhas coloridas, e feche o ciclo com um juiz de motor independente.
+**Esta skill é para quem trabalha com mais de uma IA** e quer delegar as missões
+grandes aos provedores que já paga — maximizando desempenho, espalhando o peso dos
+custos entre as assinaturas e chegando a resultados melhores, mais rápido.
 
-> A tese: seu agente principal (o caro) **não executa nada** — só decompõe, contrata,
-> despacha, colhe, julga e sintetiza. O músculo é 100% da frota de assinaturas que você
-> já paga. Heterogeneidade de motores vira auditoria cruzada de graça.
+O agente principal (o caro) **não executa nada**: decompõe a missão em contratos com
+etapas verificáveis, despacha workers em CLIs de IA *diferentes* em paralelo,
+acompanha tudo num painel vivo de progresso, e fecha o ciclo com um **juiz de motor
+independente** que re-verifica por conta própria — heterogeneidade virando auditoria
+de graça.
+
+> Inspirada na habilidade `/swarm` do Kimi Code e no modo ultracode do Claude Code —
+> e nascida do encontro dos dois: a dispersão de um, a exigência do outro.
 
 ## O ciclo
 
