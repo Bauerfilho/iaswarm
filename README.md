@@ -18,6 +18,18 @@ A única coisa que a skill **proíbe** à orquestradora é executar o músculo e
 > Inspirada na habilidade `/swarm` do Kimi Code e no modo ultracode do Claude Code —
 > e nascida do encontro dos dois: a dispersão de um, a exigência do outro.
 
+## Instalação
+
+```bash
+git clone https://github.com/Bauerfilho/iaswarm && cd iaswarm && ./install.sh
+```
+
+Instala os scripts + painel em `~/.claude/scripts/iaswarm` e a skill em
+`~/.claude/skills/iaswarm` (destinos customizáveis via `IASWARM_SCRIPTS` /
+`IASWARM_SKILL`). Depois: adapte as funções `despacha_*` aos SEUS CLIs de IA
+(~10 linhas por braço) e dispare sua primeira missão com o modelo em
+[`exemplos/garimpo-repos/`](exemplos/garimpo-repos/).
+
 ## O ciclo
 
 ```
