@@ -154,3 +154,11 @@ o risco em voz alta a escondê-lo atrás de um default que parece seguro e não 
 ## Licença
 
 MIT.
+
+---
+
+## Autoria
+
+**Obra de Bauer Vieira Cesar Filho ([Bauerfilho](https://github.com/Bauerfilho)).**
+A visão, as decisões, o desenho e a direção são dele — do primeiro projeto à shell que
+unifica tudo. As IAs da frota trabalham sob a orquestração e o julgamento dele.
