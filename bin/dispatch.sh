@@ -30,14 +30,14 @@ Fronteira de escrita: SOMENTE os caminhos citados no contrato + progress/resulta
 # ---------------- adaptadores ----------------
 despacha_qwen() { local w=$1 n=$2 c=$3
   marca "$w" 0 "$n" despachado "qwen -y"
-  ( qwen -y -p "$(protocolo "$w" "$n" "$c")" > "logs/$w.log" 2>&1
+  ( qwen -y -p "$(protocolo "$w" "$n" "$c")" < /dev/null > "logs/$w.log" 2>&1
     if [ -s "resultados/$w.md" ]; then marca "$w" "$n" "$n" entregue ""; else marca "$w" -1 "$n" falhou "sem resultado (ver logs/$w.log)"; fi ) &
   echo $! > "logs/$w.pid"
 }
 
 despacha_codex() { local w=$1 n=$2 c=$3
   marca "$w" 0 "$n" despachado "codex exec"
-  ( codex exec "$(protocolo "$w" "$n" "$c")" > "logs/$w.log" 2>&1
+  ( codex exec "$(protocolo "$w" "$n" "$c")" < /dev/null > "logs/$w.log" 2>&1
     if [ -s "resultados/$w.md" ]; then marca "$w" "$n" "$n" entregue ""; else marca "$w" -1 "$n" falhou "sem resultado (ver logs/$w.log)"; fi ) &
   echo $! > "logs/$w.pid"
 }
